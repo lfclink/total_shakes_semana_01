@@ -1,6 +1,12 @@
 package pedido;
 
+import ingredientes.Ingrediente;
+import produto.Shake;
+import produto.TipoTamanho;
+
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Optional;
 
 public class Pedido{
 
@@ -27,23 +33,50 @@ public class Pedido{
     }
 
     public double calcularTotal(Cardapio cardapio){
-        double total= 0;
-        //TODO
+        double total = 0;
+
+        for (ItemPedido itemPedido : itens) {
+            total += itemPedido.getShake().getTipoTamanho().atualizaValorTamanho(cardapio.buscarPreco(itemPedido.getShake().getBase())) * itemPedido.getQuantidade();
+            for (Ingrediente adicional : itemPedido.getShake().getAdicionais()) {
+                total += cardapio.buscarPreco(adicional) * itemPedido.getQuantidade();
+            }
+        };
+
         return total;
     }
 
     public void adicionarItemPedido(ItemPedido itemPedidoAdicionado){
-        //TODO
+        if(itemPedidoAdicionado.getShake().getAdicionais() != null){
+            Collections.sort(itemPedidoAdicionado.getShake().getAdicionais(), Collections.reverseOrder());
+        }
+        Optional<ItemPedido> itemPedido = itens.stream().filter(f -> f.getShake().equals(itemPedidoAdicionado.getShake())).findFirst();
+        if(itemPedido.isEmpty()){
+            itens.add(itemPedidoAdicionado);
+        } else {
+            itemPedidoAdicionado.setQuantidade(itemPedido.get().getQuantidade() + itemPedidoAdicionado.getQuantidade());
+            itens.remove(itemPedido.get());
+            itens.add(itemPedidoAdicionado);
+        }
     }
 
-    public boolean removeItemPedido(ItemPedido itemPedidoRemovido) {
-        //substitua o true por uma condição
-        if (true) {
-            //TODO
-        } else {
-            throw new IllegalArgumentException("Item nao existe no pedido.");
+    public void removeItemPedido(ItemPedido itemPedidoRemovido) {
+        if(itemPedidoRemovido.getShake().getAdicionais() != null){
+            Collections.sort(itemPedidoRemovido.getShake().getAdicionais(), Collections.reverseOrder());
         }
-        return false;
+        Optional<ItemPedido> itemPedido = itens.stream().filter(f -> f.getShake().equals(itemPedidoRemovido.getShake())).findAny();
+        if (itemPedido.isEmpty()) {
+            throw new IllegalArgumentException("Item nao existe no pedido.");
+        } else {
+            if(itemPedido.get().getQuantidade() - 1 == 0){
+                itens.remove(itemPedido.get());
+            } else {
+                for (ItemPedido i : itens) {
+                    if(i.equals(itemPedido.get())){
+                        i.setQuantidade(i.getQuantidade() - 1);
+                    }
+                }
+            }
+        }
     }
 
     @Override
