@@ -2,6 +2,8 @@ package pedido;
 
 import produto.Shake;
 
+import java.util.Objects;
+
 public class ItemPedido {
     private Shake shake;
     private int quantidade;
@@ -21,6 +23,19 @@ public class ItemPedido {
 
     public void setQuantidade(int quantidade) {
         this.quantidade = quantidade;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ItemPedido)) return false;
+        ItemPedido that = (ItemPedido) o;
+        return quantidade == that.quantidade && shake.equals(that.shake);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(shake, quantidade);
     }
 
     @Override
